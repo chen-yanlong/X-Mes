@@ -1,23 +1,26 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.22;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 
-contract MyOApp is OApp {
+contract Chatroom is OApp {
     constructor(address _endpoint, address _delegate) OApp(_endpoint, _delegate) Ownable(_delegate) {}
 
     string public data = "Nothing received yet.";
+
+    // Event for logging sent and received messages, with timestamp
+    event MessageSent(address indexed sender, uint32 indexed dstEid, string message, uint256 timestamp);
+    event MessageReceived(address indexed sender, string message, uint256 timestamp);
 
     /**
      * @notice Sends a message from the source chain to a destination chain.
      * @param _dstEid The endpoint ID of the destination chain.
      * @param _message The message string to be sent.
      * @param _options Additional options for message execution.
-     * @dev Encodes the message as bytes and sends it using the `_lzSend` internal function.
-     * @return receipt A `MessagingReceipt` struct containing details of the message sent.
+     * @dev Encodes the message as bytes and sends it using the _lzSend internal function.
+     * @return receipt A MessagingReceipt struct containing details of the message sent.
      */
     function send(
         uint32 _dstEid,
@@ -26,6 +29,9 @@ contract MyOApp is OApp {
     ) external payable returns (MessagingReceipt memory receipt) {
         bytes memory _payload = abi.encode(_message);
         receipt = _lzSend(_dstEid, _payload, _options, MessagingFee(msg.value, 0), payable(msg.sender));
+        
+        // Emit event for the sent message, with block.timestamp
+        emit MessageSent(msg.sender, _dstEid, _message, block.timestamp);
     }
 
     /**
@@ -34,7 +40,7 @@ contract MyOApp is OApp {
      * @param _message The message.
      * @param _options Message execution options (e.g., for sending gas to destination).
      * @param _payInLzToken Whether to return fee in ZRO token.
-     * @return fee A `MessagingFee` struct containing the calculated gas fee in either the native token or ZRO token.
+     * @return fee A MessagingFee struct containing the calculated gas fee in either the native token or ZRO token.
      */
     function quote(
         uint32 _dstEid,
@@ -65,6 +71,9 @@ contract MyOApp is OApp {
         address /*_executor*/,
         bytes calldata /*_extraData*/
     ) internal override {
-        data = abi.decode(payload, (string));
+        string memory receivedMessage = abi.decode(payload, (string));
+        data = receivedMessage; 
+        
+        emit MessageReceived(msg.sender, receivedMessage, block.timestamp);
     }
 }
