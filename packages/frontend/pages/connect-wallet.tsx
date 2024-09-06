@@ -1,28 +1,8 @@
-// pages/connect-wallet.tsx
-import { useState } from 'react';
-import { ethers } from 'ethers';
-import Web3Modal from 'web3modal';
+import { useWallet } from '../contexts/WalletContext';
 import Banner from '../components/Banner';
 
 export default function ConnectWallet() {
-  const [account, setAccount] = useState<string | null>(null);
-  const [network, setNetwork] = useState<string | null>(null);
-
-  const connectWallet = async () => {
-    try {
-      const web3Modal = new Web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.BrowserProvider(connection);
-      const signer = await provider.getSigner();
-      const userAddress = await signer.getAddress();
-      const network = await provider.getNetwork();
-
-      setAccount(userAddress);
-      setNetwork(network.name);
-    } catch (error) {
-      console.error('Connection error:', error);
-    }
-  };
+  const { account, network, connectWallet } = useWallet();
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">

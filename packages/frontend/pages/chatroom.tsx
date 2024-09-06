@@ -1,39 +1,42 @@
 // pages/chatroom.tsx
 import { useState } from 'react';
 import Banner from '../components/Banner';
+import FriendInput from '../components/FriendInput';
+import ChatWindow from '../components/ChatWindow';
 
 export default function Chatroom() {
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<string[]>([]);
+  const [friendAddress, setFriendAddress] = useState<string>(''); // Address to chat with
+  const [isFriend, setIsFriend] = useState<boolean | null>(null); // Whether the friend has added you
+  const [chatInitialized, setChatInitialized] = useState<boolean>(false); // Whether the chat is initialized
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      setMessages([...messages, message]);
-      setMessage('');
-    }
+  // Handle initializing the chatroom after friend verification
+  const initializeChatroom = () => {
+    setChatInitialized(true);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <Banner />
-      <div style={{ textAlign: 'center', marginTop: '50px' }}>
-        <h2>Chatroom</h2>
-        <input
-          type="text"
-          placeholder="Enter message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          style={{ padding: '10px', width: '300px', marginBottom: '10px' }}
-        />
-        <br />
-        <button onClick={sendMessage} style={{ padding: '10px 20px', fontSize: '16px' }}>
-          Send Message
-        </button>
-        <div style={{ marginTop: '20px' }}>
-          {messages.map((msg, index) => (
-            <p key={index}>{msg}</p>
-          ))}
-        </div>
+      <div className="text-center mt-12">
+        <h2 className="text-3xl font-bold mb-6">Chatroom</h2>
+
+        {/* Step 1: Friend Input and Check Status */}
+        {!chatInitialized && (
+          <FriendInput
+            friendAddress={friendAddress}
+            setFriendAddress={setFriendAddress}
+            setIsFriend={setIsFriend}
+            isFriend={isFriend}
+            initializeChatroom={initializeChatroom}
+          />
+        )}
+
+        {/* Step 2: Chat functionality */}
+        {chatInitialized && (
+          <ChatWindow 
+            friendAddress = {friendAddress}
+          />
+        )}
       </div>
     </div>
   );

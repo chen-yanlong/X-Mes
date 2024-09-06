@@ -1,12 +1,16 @@
-// pages/index.tsx
 import { useRouter } from 'next/router';
-import '../app/globals.css';
+import { useWallet } from '../contexts/WalletContext';
 
 export default function Home() {
   const router = useRouter();
+  const { account, connectWallet } = useWallet(); // Get wallet context
 
   const navigateToApp = () => {
-    router.push('/connect-wallet');
+    if (!account) {
+      connectWallet(); // Connect wallet if not connected
+    } else {
+      router.push('/connect-wallet'); // Navigate if already connected
+    }
   };
 
   return (
@@ -20,7 +24,7 @@ export default function Home() {
         onClick={navigateToApp}
         className="bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-300"
       >
-        Go to App
+        {account ? 'Go to App' : 'Connect Wallet'}
       </button>
     </div>
   );
