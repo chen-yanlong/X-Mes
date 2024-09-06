@@ -9,7 +9,11 @@
     "build": "lerna run build",
     "frontend": "yarn workspace frontend dev"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ethsign/sp-sdk": "^0.7.3",
+    "dotenv": "^16.4.5",
+    "viem": "^2.21.2"
+  },
   "devDependencies": {
     "lerna": "^8.1.8"
   }

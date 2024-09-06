@@ -12,7 +12,7 @@ require('dotenv').config(); // Load environment variables
     }
 
     const client = new SignProtocolClient(SpMode.OnChain, {
-      chain: EvmChains.baseSepolia,
+      chain: EvmChains.arbitrumSepolia,
       account: privateKeyToAccount(privateKey),
     });
 
