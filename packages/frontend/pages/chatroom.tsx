@@ -16,16 +16,15 @@ export default function Chatroom() {
   
   const [friendKey, setFriendKey] = useState<string>("");
   const [friendOappAddress, setFriendOappAddress] = useState<string>("");
-  const [userOappAddress, setUserOappAddress] = useState<string>("");
 
-  const {setKey, key, ECDH } = useChat();
-  const { network } = useWallet();
+  const {setKey, key, ECDH, userOappAddress } = useChat();
+  const { account, network } = useWallet();
 
 
   //TODO: move to service
   // Handle initializing the chatroom after friend verification
   const initializeChatroom = async () => {
-    //calculate mutual key
+    // calculate mutual key
     if (!ECDH) {
       console.error('ECDH instance not available');
       return;
@@ -43,17 +42,28 @@ export default function Chatroom() {
   };
 
   const setPeers = async () => {
-    const oappABI = ChatroomArtifact.abi
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send('eth_requestAccounts', []);
-    const signer = await provider.getSigner();
-    const OAppContract = new ethers.Contract(userOappAddress, oappABI, signer);
-    const Eid = (friendChain == "sepolia") ? 40161 : 40231
-    const tx = await OAppContract.setPeer(Eid, addressToBytes32(friendOappAddress));
-    await tx.wait();
-    console.log("peer set at your contract")
-  }
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send('eth_requestAccounts', []);
+      const signer = await provider.getSigner();
 
+      console.log("userOappAddress:", userOappAddress)
+      console.log("friendOappAddress:", friendOappAddress)
+      if (!ethers.isAddress(userOappAddress) || !ethers.isAddress(friendOappAddress)) {
+        throw new Error('Invalid address');
+      }
+  
+      const OAppContract = new ethers.Contract(userOappAddress, ChatroomArtifact.abi, signer);
+      const Eid = (friendChain === "sepolia") ? 40161 : 40231;
+      const tx = await OAppContract.setPeer(Eid, addressToBytes32(friendOappAddress));
+      await tx.wait();
+  
+      console.log('Peer set successfully');
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+  
   const addressToBytes32 = (address: string): string => {
     const checksumAddress = getAddress(address);
     return zeroPadValue(checksumAddress, 32);
@@ -83,6 +93,7 @@ export default function Chatroom() {
         {/* Step 2: Chat functionality */}
         {chatInitialized && (
           <ChatWindow 
+            userAddress= {account}
             friendAddress = {friendAddress}
           />
         )}

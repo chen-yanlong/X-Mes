@@ -6,11 +6,7 @@ export default function Home() {
   const { account, connectWallet } = useWallet(); // Get wallet context
 
   const navigateToApp = () => {
-    if (!account) {
-      connectWallet(); // Connect wallet if not connected
-    } else {
-      router.push('/connect-wallet'); // Navigate if already connected
-    }
+    router.push('/connect-wallet'); // Navigate if already connected
   };
 
   return (
@@ -24,7 +20,7 @@ export default function Home() {
         onClick={navigateToApp}
         className="bg-blue-600 text-white font-semibold py-3 px-8 rounded-lg shadow-lg hover:bg-blue-700 transition-colors duration-300"
       >
-        {account ? 'Go to App' : 'Connect Wallet'}
+        {'Go to App'}
       </button>
     </div>
   );

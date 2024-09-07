@@ -9,17 +9,19 @@ export default function FriendRequest() {
   const [chain, setChain] = useState(''); // State for storing the selected chain
   const [statusMessage, setStatusMessage] = useState(''); // To show success/failure messages
   const { account, network, connectWallet } = useWallet();
+  const { setUserOappAddress, setECDH } = useChat();
+
 
 
   const handleSendRequest = async () => {
 
-    try {
+    // try {
       // Call the service function and pass the friendAddress and chain
-      await sendFriendRequest(account, network, friendAddress, chain);
+      await sendFriendRequest(account, network, friendAddress, chain, setUserOappAddress, setECDH);
       setStatusMessage(`Friend request sent to ${friendAddress} on ${chain} successfully!`);
-    } catch (error) {
-      setStatusMessage(`Failed to send friend request: ${error.message}`);
-    }
+    // } catch (error) {
+    //   setStatusMessage(`Failed to send friend request: ${error}`);
+    // }
   };
 
   return (
