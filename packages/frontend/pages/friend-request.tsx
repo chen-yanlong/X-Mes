@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import Banner from '../components/Banner';
 import { sendFriendRequest } from '../services/friendService';
+import { useWallet } from '../contexts/WalletContext';
 
 export default function FriendRequest() {
   const [friendAddress, setFriendAddress] = useState('');
   const [chain, setChain] = useState(''); // State for storing the selected chain
   const [statusMessage, setStatusMessage] = useState(''); // To show success/failure messages
+  const { account, network, connectWallet } = useWallet();
 
   const handleSendRequest = async () => {
+
     try {
       // Call the service function and pass the friendAddress and chain
-      await sendFriendRequest(friendAddress, chain);
+      await sendFriendRequest(account, network, friendAddress, chain);
       setStatusMessage(`Friend request sent to ${friendAddress} on ${chain} successfully!`);
     } catch (error) {
       setStatusMessage(`Failed to send friend request: ${error.message}`);

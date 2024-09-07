@@ -21,15 +21,14 @@ export default function FriendInput({
   // Simulate checking if the friend has added you
   const checkFriendStatus = async () => {
     setLoading(true);
-    const friendAddedYou = await mockCheckIfFriendAddedYou(friendAddress);
+    const friendAddedYou = await checkIfFriendAddedYou(friendAddress);
     setIsFriend(friendAddedYou);
     setLoading(false);
   };
 
-  // Mock function to simulate checking if the friend added you
-  const mockCheckIfFriendAddedYou = async (address: string) => {
+const checkIfFriendAddedYou = async (address: string) => {
     return true; // Simulate a friend always being added
-  };
+};
 
   return (
     <div>

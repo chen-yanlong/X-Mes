@@ -1,8 +1,8 @@
 {
     "schema":{
         "sepolia":{
-            "schemaId":"0x100",
-            "txHash":"0x418c01ea89a74271bdc731776d27b5ab486929b29a8dd9bacf4483ad19467ddc"
+            "schemaId":"0x157",
+            "txHash":"0x2c960db604ef310ac288c459065ca6263b4f32bfc43ad5586cf8bf17db7fea42"
         },
         "arbitrum sepolia": {
             "schemaId": "0xd7",
