@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ethsign/sp-sdk": "^0.7.3",
+    "@layerzerolabs/lz-v2-utilities": "^2.3.41",
     "axios": "^1.7.7",
     "ethers": "^6.13.2",
     "next": "14.2.7",

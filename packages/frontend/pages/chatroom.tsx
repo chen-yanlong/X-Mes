@@ -25,17 +25,17 @@ export default function Chatroom() {
   // Handle initializing the chatroom after friend verification
   const initializeChatroom = async () => {
     // calculate mutual key
-    if (!ECDH) {
-      console.error('ECDH instance not available');
-      return;
-    }
-    try {
-      const friendKeyBuffer = Buffer.from(friendKey, 'base64');
-      const mutualKey: Buffer = ECDH.computeSecret(friendKeyBuffer);
-      setKey(mutualKey.toString('base64'));
-    } catch (error) {
-      console.error('Error computing the secret:', error);
-    }
+    // if (!ECDH) {
+    //   console.error('ECDH instance not available');
+    //   return;
+    // }
+    // try {
+    //   const friendKeyBuffer = Buffer.from(friendKey, 'base64');
+    //   const mutualKey: Buffer = ECDH.computeSecret(friendKeyBuffer);
+    //   setKey(mutualKey.toString('base64'));
+    // } catch (error) {
+    //   console.error('Error computing the secret:', error);
+    // }
 
     await setPeers();
     setChatInitialized(true);
@@ -95,6 +95,7 @@ export default function Chatroom() {
           <ChatWindow 
             userAddress= {account}
             friendAddress = {friendAddress}
+            friendChain= {friendChain}
           />
         )}
       </div>

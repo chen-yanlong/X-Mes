@@ -1,25 +1,30 @@
 import { useEffect, useState } from 'react';
-import { getChatHistory } from '../services/chatService'; // Import the helper function
-
+import { getChatHistory } from '../services/chatService'; 
+import { ethers } from 'ethers';
+import ChatroomArtifact from '../abi/ChatRoom.json'; 
+import { useChat } from '../contexts/ChatContext';
+import { Options } from '@layerzerolabs/lz-v2-utilities'
 interface ChatWindowProps {
   userAddress: string; // My address
   friendAddress: string; // Friend's address
+  friendChain: string
 }
 
-export default function ChatWindow({ userAddress, friendAddress }: ChatWindowProps) {
+export default function ChatWindow({ userAddress, friendAddress, friendChain }: ChatWindowProps) {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<{ sender: string; content: string; timestamp: number }[]>([]);
+  const { userOappAddress } = useChat();
 
   // Fetch chat history on load
   useEffect(() => {
     async function loadChatHistory() {
-      const history = await getChatHistory(); // Fetch history from contract
+      const history = await getChatHistory(userOappAddress);
       setMessages(history);
     }
     loadChatHistory();
   }, []);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (message.trim()) {
       const newMessage = {
         sender: userAddress,
@@ -27,8 +32,31 @@ export default function ChatWindow({ userAddress, friendAddress }: ChatWindowPro
         timestamp: Date.now(),
       };
       setMessages([...messages, newMessage]); // Add message locally
-      setMessage(''); // Clear input
-      // Here you would also send the message to the contract
+      
+      try {
+        console.log("message:", message)
+        
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+        const signer = await provider.getSigner();
+    
+        // Create a new instance of the contract
+        const contract = new ethers.Contract(userOappAddress, ChatroomArtifact.abi, signer);
+    
+        // Encode the message
+        const payload = ethers.AbiCoder.defaultAbiCoder().encode(['string'], [message]);
+        const dstEid = (friendChain === "sepolia") ? 40161 : 40231;
+        const options = Options.newOptions().addExecutorLzReceiveOption(200000, 0).toHex().toString()
+        let nativeFee = 0
+        ;[nativeFee] = await contract.quote(dstEid, message, options, false)
+        const tx = await contract.send(dstEid, message, options, { value: nativeFee.toString() })
+        await tx.wait();
+
+        console.log('Message sent successfully');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+      setMessage(''); 
     }
   };
 

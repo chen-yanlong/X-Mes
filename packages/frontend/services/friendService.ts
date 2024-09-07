@@ -1,5 +1,5 @@
 import { SignProtocolClient, SpMode, EvmChains } from "@ethsign/sp-sdk";
-import ChatroomArtifact from '../abi/ChatRoom.json';
+import ChatroomArtifact from '../abi/Chatroom.json';
 import { ethers } from 'ethers';
 import Web3Modal from 'web3modal';
 import crypto from 'crypto';
