@@ -88,7 +88,6 @@ async function attestToSignProtocol(
     const client = new SignProtocolClient(SpMode.OnChain, {
         chain: signOnChain,
     });
-    console.log(schemaId)
     const res = await client.createAttestation({
         schemaId: schemaId,
         data: {

@@ -3,8 +3,8 @@ import { ethers } from 'ethers';
 import Web3Modal from 'web3modal';
 
 interface WalletContextType {
-  account: string | null;
-  network: string | null;
+  account: string;
+  network: string;
   connectWallet: () => Promise<void>;
 }
 
@@ -19,8 +19,8 @@ export const useWallet = () => {
 };
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
-  const [account, setAccount] = useState<string | null>(null);
-  const [network, setNetwork] = useState<string | null>(null);
+  const [account, setAccount] = useState<string>("");
+  const [network, setNetwork] = useState<string>("");
 
   const connectWallet = async () => {
     try {

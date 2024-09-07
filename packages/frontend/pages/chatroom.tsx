@@ -6,8 +6,11 @@ import ChatWindow from '../components/ChatWindow';
 
 export default function Chatroom() {
   const [friendAddress, setFriendAddress] = useState<string>(''); // Address to chat with
+  const [friendChain, setFriendChain] = useState<string>('');
   const [isFriend, setIsFriend] = useState<boolean | null>(null); // Whether the friend has added you
   const [chatInitialized, setChatInitialized] = useState<boolean>(false); // Whether the chat is initialized
+  const [key, setKey] = useState<string>("");
+  
 
   // Handle initializing the chatroom after friend verification
   const initializeChatroom = () => {
@@ -24,6 +27,8 @@ export default function Chatroom() {
         {!chatInitialized && (
           <FriendInput
             friendAddress={friendAddress}
+            friendChain={friendChain}
+            setFriendChain={setFriendChain}
             setFriendAddress={setFriendAddress}
             setIsFriend={setIsFriend}
             isFriend={isFriend}
