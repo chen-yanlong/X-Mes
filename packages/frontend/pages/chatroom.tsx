@@ -1,20 +1,62 @@
 // pages/chatroom.tsx
 import { useState } from 'react';
+import { useChat } from '../contexts/ChatContext'
 import Banner from '../components/Banner';
 import FriendInput from '../components/FriendInput';
 import ChatWindow from '../components/ChatWindow';
+import { ethers, getAddress, zeroPadValue, toUtf8Bytes } from 'ethers';
+import ChatroomArtifact from '../abi/ChatRoom.json';
+import { useWallet } from '../contexts/WalletContext';
 
 export default function Chatroom() {
   const [friendAddress, setFriendAddress] = useState<string>(''); // Address to chat with
   const [friendChain, setFriendChain] = useState<string>('');
   const [isFriend, setIsFriend] = useState<boolean | null>(null); // Whether the friend has added you
   const [chatInitialized, setChatInitialized] = useState<boolean>(false); // Whether the chat is initialized
-  const [key, setKey] = useState<string>("");
   
+  const [friendKey, setFriendKey] = useState<string>("");
+  const [friendOappAddress, setFriendOappAddress] = useState<string>("");
+  const [userOappAddress, setUserOappAddress] = useState<string>("");
 
+  const {setKey, key, ECDH } = useChat();
+  const { network } = useWallet();
+
+
+  //TODO: move to service
   // Handle initializing the chatroom after friend verification
-  const initializeChatroom = () => {
+  const initializeChatroom = async () => {
+    //calculate mutual key
+    if (!ECDH) {
+      console.error('ECDH instance not available');
+      return;
+    }
+    try {
+      const friendKeyBuffer = Buffer.from(friendKey, 'base64');
+      const mutualKey: Buffer = ECDH.computeSecret(friendKeyBuffer);
+      setKey(mutualKey.toString('base64'));
+    } catch (error) {
+      console.error('Error computing the secret:', error);
+    }
+
+    await setPeers();
     setChatInitialized(true);
+  };
+
+  const setPeers = async () => {
+    const oappABI = ChatroomArtifact.abi
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    const signer = await provider.getSigner();
+    const OAppContract = new ethers.Contract(userOappAddress, oappABI, signer);
+    const Eid = (friendChain == "sepolia") ? 40161 : 40231
+    const tx = await OAppContract.setPeer(Eid, addressToBytes32(friendOappAddress));
+    await tx.wait();
+    console.log("peer set at your contract")
+  }
+
+  const addressToBytes32 = (address: string): string => {
+    const checksumAddress = getAddress(address);
+    return zeroPadValue(checksumAddress, 32);
   };
 
   return (
@@ -33,6 +75,8 @@ export default function Chatroom() {
             setIsFriend={setIsFriend}
             isFriend={isFriend}
             initializeChatroom={initializeChatroom}
+            setFriendKey={setFriendKey}
+            setFriendOappAddress={setFriendOappAddress}
           />
         )}
 

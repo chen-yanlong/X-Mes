@@ -12,6 +12,8 @@ interface FriendInputProps {
     setIsFriend: (isFriend: boolean) => void;
     isFriend: boolean | null;
     initializeChatroom: () => void;
+    setFriendKey: (key: string) => void
+    setFriendOappAddress:(friendOappAddress: string) => void
 }
 
 export default function FriendInput({
@@ -22,19 +24,32 @@ export default function FriendInput({
     setIsFriend,
     isFriend,
     initializeChatroom,
+    setFriendKey,
+    setFriendOappAddress,
 }: FriendInputProps) {
     const [loading, setLoading] = useState(false);
-    const { account, network }= useWallet();
+    const { account, network } = useWallet();
 
     const checkFriendStatus = async () => {
         setLoading(true);
         const youAddedFriendData = await checkAttestation(network, account, friendChain, friendAddress);
-        if(!youAddedFriendData)
+        if(!youAddedFriendData){
             console.log("you havent added friend");
+            setIsFriend(false)
+            setLoading(false);
+            return
+        }
         const friendAddedYouData = await checkAttestation(friendChain, friendAddress, network, account);
-        if(!friendAddedYouData)
+        if(!friendAddedYouData){
             console.log("friend havent added you");
-        setIsFriend(youAddedFriendData && friendAddedYouData);
+            setIsFriend(false);
+            setLoading(false);
+            return
+        }
+        setIsFriend(true);
+        setFriendKey(friendAddedYouData.key)
+        setFriendOappAddress(friendAddedYouData.oappAddress)
+
         setLoading(false);
     };
 

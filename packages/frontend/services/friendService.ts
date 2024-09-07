@@ -3,6 +3,7 @@ import ChatroomArtifact from '../abi/ChatRoom.json';
 import { ethers } from 'ethers';
 import Web3Modal from 'web3modal';
 import crypto from 'crypto';
+import { useChat } from '../contexts/ChatContext';
 
 /**
  * Sends a friend request by signing an attestation.
@@ -15,6 +16,7 @@ export async function sendFriendRequest(
     friendAddress: string, 
     friendChain: string
 ) {
+    const { setUserOappAddress, setECDH} = useChat();
     //TODO: change this if added more chain
     const signOnChain = (userChain === "sepolia") ? EvmChains.sepolia : EvmChains.arbitrumSepolia;
     const schemaId = (userChain === "sepolia") ? "0x157" : "0xd7";
@@ -22,9 +24,11 @@ export async function sendFriendRequest(
     try {
         // deploy oapp smart contract
         const oappAddress = await deployOAPP(userAddress, userChain);
+        setUserOappAddress(oappAddress);
         
         // generate ECDH key
         const { ECDH, userKeyBase64 } = generateKey();
+        setECDH(ECDH);
         
         // attest to sign protocol
         const signRes = await attestToSignProtocol(

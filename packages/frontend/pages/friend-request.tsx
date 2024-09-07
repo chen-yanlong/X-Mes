@@ -2,12 +2,14 @@ import { useState } from 'react';
 import Banner from '../components/Banner';
 import { sendFriendRequest } from '../services/friendService';
 import { useWallet } from '../contexts/WalletContext';
+import { useChat } from '../contexts/ChatContext'
 
 export default function FriendRequest() {
   const [friendAddress, setFriendAddress] = useState('');
   const [chain, setChain] = useState(''); // State for storing the selected chain
   const [statusMessage, setStatusMessage] = useState(''); // To show success/failure messages
   const { account, network, connectWallet } = useWallet();
+
 
   const handleSendRequest = async () => {
 
