@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import ChatroomArtifact from '../abi/ChatRoom.json';
+import ChatroomArtifact from '../abi/Chatroom.json';
 
 export const getChatHistory = async (userOappAddress: string) => {
   try {
