@@ -58,5 +58,5 @@ arbitrum-sepolia
 2. Add messaging between users on same chain
 3. Connect users as an OFT ERC6551 to have a more extensive onchain identity
 4. Listen to events from contract so that app can automatically refresh chat history
-5. Add more function to this chatroom, ex. OFT transfer, bot, ...
+5. Add more function to this chatroom, ex. OFT transfer, bot.
 
