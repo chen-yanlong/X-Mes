@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
-import { getChatHistory } from '../services/chatService'; 
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import ChatroomArtifact from '../abi/ChatRoom.json'; 
 import { useChat } from '../contexts/ChatContext';
-import { Options } from '@layerzerolabs/lz-v2-utilities'
+import { Options } from '@layerzerolabs/lz-v2-utilities';
+import { AbiCoder } from 'ethers';
+
 interface ChatWindowProps {
   userAddress: string; // My address
   friendAddress: string; // Friend's address
-  friendChain: string
+  friendChain: string;
 }
 
 export default function ChatWindow({ userAddress, friendAddress, friendChain }: ChatWindowProps) {
@@ -17,12 +18,13 @@ export default function ChatWindow({ userAddress, friendAddress, friendChain }: 
 
   // Fetch chat history on load
   useEffect(() => {
-    async function loadChatHistory() {
-      const history = await getChatHistory(userOappAddress);
-      setMessages(history);
-    }
+    const loadChatHistory = async () => {
+      if (userOappAddress) {
+        await refreshChatHistory(); // Initial load
+      }
+    };
     loadChatHistory();
-  }, []);
+  }, [userOappAddress]);
 
   const sendMessage = async () => {
     if (message.trim()) {
@@ -31,11 +33,10 @@ export default function ChatWindow({ userAddress, friendAddress, friendChain }: 
         content: message,
         timestamp: Date.now(),
       };
-      setMessages([...messages, newMessage]); // Add message locally
-      
+      setMessages((prevMessages) => [...prevMessages, newMessage]); // Add message locally
+      setMessage(''); // Clear input field
+
       try {
-        console.log("message:", message)
-        
         const provider = new ethers.BrowserProvider(window.ethereum);
         await provider.send('eth_requestAccounts', []);
         const signer = await provider.getSigner();
@@ -46,17 +47,47 @@ export default function ChatWindow({ userAddress, friendAddress, friendChain }: 
         // Encode the message
         const payload = ethers.AbiCoder.defaultAbiCoder().encode(['string'], [message]);
         const dstEid = (friendChain === "sepolia") ? 40161 : 40231;
-        const options = Options.newOptions().addExecutorLzReceiveOption(200000, 0).toHex().toString()
-        let nativeFee = 0
-        ;[nativeFee] = await contract.quote(dstEid, message, options, false)
-        const tx = await contract.send(dstEid, message, options, { value: nativeFee.toString() })
+        const options = Options.newOptions().addExecutorLzReceiveOption(200000, 0).toHex().toString();
+        
+        // Fetch the quote for the fee
+        const [nativeFee] = await contract.quote(dstEid, payload, options, false);
+        
+        // Send the message
+        const tx = await contract.send(dstEid, payload, options, { value: nativeFee });
         await tx.wait();
 
         console.log('Message sent successfully');
       } catch (error) {
         console.error('Error sending message:', error);
       }
-      setMessage(''); 
+    }
+  };
+
+  // Function to refresh the chat history
+  const refreshChatHistory = async () => {
+    try {
+      if (userOappAddress) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const contract = new ethers.Contract(userOappAddress, ChatroomArtifact.abi, provider);
+        
+        // Fetch all messages directly from the contract
+        const messagesFromContract = await contract.data(); 
+        const abiCoder = new AbiCoder();
+
+        // Assuming `data` returns an array of messages, decode each one
+        // Define the expected data type, which is 'string'
+        const decodedMessage = abiCoder.decode(['string'], messagesFromContract);
+        const timestamp = Math.floor(Date.now() / 1000);
+        const newMessage = {
+          sender:friendAddress,
+          content: decodedMessage[0],
+          timestamp
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      }
+    } catch (error) {
+      console.error('Error refreshing chat history:', error);
     }
   };
 
@@ -67,18 +98,28 @@ export default function ChatWindow({ userAddress, friendAddress, friendChain }: 
       </div>
 
       <div className="overflow-y-auto h-80 mb-4 bg-gray-100 p-4 rounded-md">
-        {messages.map((msg, index) => (
-          <div key={index} className={`mb-2 flex ${msg.sender === userAddress ? 'justify-end' : 'justify-start'}`}>
-            <div
-              className={`p-3 rounded-lg max-w-xs ${msg.sender === userAddress ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
-            >
-              <p>{msg.content}</p>
-              <small className="block text-xs text-right mt-1">
-                {new Date(msg.timestamp).toLocaleTimeString()}
-              </small>
+        {messages.length > 0 ? (
+          messages.map((msg, index) => (
+            <div key={index} className={`mb-2 flex ${msg.sender === userAddress ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`p-3 rounded-lg max-w-xs ${msg.sender === userAddress ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}
+              >
+                <p>{msg.content}</p>
+                <small className="block text-xs text-right mt-1">
+                  {new Date(msg.timestamp * 1000).toLocaleTimeString()}
+                </small>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No messages yet</p>
+        )}
+      </div>
+
+      <div className="flex mb-4">
+        <button onClick={refreshChatHistory} className="bg-gray-500 text-white font-semibold py-2 px-4 rounded">
+          Refresh Chat
+        </button>
       </div>
 
       <div className="flex">

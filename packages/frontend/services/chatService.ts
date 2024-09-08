@@ -6,16 +6,21 @@ export const getChatHistory = async (userOappAddress: string) => {
     const provider = new ethers.BrowserProvider(window.ethereum); 
     const contract = new ethers.Contract(userOappAddress, ChatroomArtifact.abi, provider);
 
+    // Fetch events
     const events = await contract.queryFilter(contract.filters.MessageSent(), 0, 'latest');
 
-    return events.map((event: any) => ({
-      sender: event.args.sender,
-      content: event.args.message,
-      timestamp: event.args.timestamp.toNumber() * 1000, 
-    }));
+    // Map over events to extract relevant data
+    return events.map((event: any) => {
+      const timestamp = event.args.timestamp;
+
+      return {
+        sender: event.args.sender,
+        content: event.args.message,
+        timestamp // Convert timestamp to milliseconds
+      };
+    });
   } catch (error) {
     console.error('Error fetching chat history:', error);
     return [];
   }
-return []
 };
