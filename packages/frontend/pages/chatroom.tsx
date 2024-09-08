@@ -5,7 +5,7 @@ import Banner from '../components/Banner';
 import FriendInput from '../components/FriendInput';
 import ChatWindow from '../components/ChatWindow';
 import { ethers, getAddress, zeroPadValue, toUtf8Bytes } from 'ethers';
-import ChatroomArtifact from '../abi/ChatRoom.json';
+import ChatroomArtifact from '../abi/Chatroom.json';
 import { useWallet } from '../contexts/WalletContext';
 
 export default function Chatroom() {

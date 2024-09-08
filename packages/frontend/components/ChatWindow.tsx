@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import ChatroomArtifact from '../abi/ChatRoom.json'; 
+import ChatroomArtifact from '../abi/Chatroom.json'; 
 import { useChat } from '../contexts/ChatContext';
 import { Options } from '@layerzerolabs/lz-v2-utilities';
 import { AbiCoder } from 'ethers';
