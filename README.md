@@ -1,4 +1,4 @@
-![banner]("./img/banner.png")
+![banner](./img/banner.png)
 
 # Xmes
 
@@ -12,7 +12,7 @@ Xmes is a project integrates LayerZero OAPP and Sign Protocol to create a decent
 - **LayerZero**: We use LayerZero OApp to set up peer yo peer communication between different chain.
 
 ## How It Works
-![workflow]("./img/workflow.jpeg)
+![workflow](./img/workflow.jpeg)
 
 1. **Connect Wallet**
    User connects to his wallet and select network
